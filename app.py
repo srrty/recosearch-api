@@ -61,3 +61,6 @@ async def search(req: SearchRequest):
     recs = recommend_related(keyword, DB_PATH)
 
     return {"results": results, "recommendations": recs}
+
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
