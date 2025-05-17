@@ -23,11 +23,9 @@ init_db(DB_PATH)
 app = FastAPI(title="Recosearch API")
 
 # 정적 파일 전체 서빙: static 폴더에서 index.html 및 CSS/JS 제공
-app.mount(
-    "/",
-    StaticFiles(directory="static", html=True),
-    name="static"
-)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # 요청/응답 모델
 class SearchRequest(BaseModel):
