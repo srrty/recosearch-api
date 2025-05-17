@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>검색 결과</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>검색 결과</h1>
+    <div id="loading">로딩 중…</div>
+    <h2>결과</h2>
+    <ul id="results"></ul>
+    <h2>추천 키워드</h2>
+    <ul id="recs"></ul>
+    <p><a href="index.html">← 다시 검색하기</a></p>
+  </div>
+  <script>
+    async function main(){
+      const params = new URLSearchParams(location.search);
+      const keyword = params.get('keyword');
+      if(!keyword){
+        alert('검색어가 없습니다.');
+        return;
+      }
+      document.getElementById('loading').style.display = 'block';
+
+      try {
+        const res = await fetch('/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keyword })
+        });
+        const data = await res.json();
+
+        const resultsEl = document.getElementById('results');
+        data.results.forEach(doc => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="${doc.link}" target="_blank">${doc.title}</a>`;
+          resultsEl.appendChild(li);
+        });
+
+        const recsEl = document.getElementById('recs');
+        data.recommendations.forEach(r => {
+          const li = document.createElement('li');
+          li.textContent = r;
+          recsEl.appendChild(li);
+        });
+      } catch(e){
+        alert('검색 중 오류가 발생했습니다.');
+        console.error(e);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+    main();
+  </script>
+</body>
+</html>

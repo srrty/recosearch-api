@@ -2,23 +2,18 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recosearch API Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recosearch 검색</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>논문·특허 추천</h1>
-    <form id="search-form">
-      <input type="text" id="keyword" placeholder="검색어를 입력하세요" required />
+    <h1>논문·특허 검색</h1>
+    <form action="results.html" method="get">
+      <input type="text" name="keyword" placeholder="검색어를 입력하세요" required />
       <button type="submit">검색</button>
     </form>
-    <div id="loading" hidden>로딩 중…</div>
-    <h2>결과</h2>
-    <ul id="results"></ul>
-    <h2>추천 키워드</h2>
-    <ul id="recs"></ul>
   </div>
-  <script src="/static/main.js"></script>
 </body>
 </html>
+
