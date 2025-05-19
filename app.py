@@ -7,8 +7,13 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI(title="Recosearch API")
 
-# 1) 기존 정적 서빙 (optional)
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+# 지금처럼 "/static" 이 아니라, "/" 에 바로 마운트
+app.mount(
+    "/",
+    StaticFiles(directory=os.path.join(BASE_DIR, "static"), html=True),
+    name="static"
+)
+
 
 # 2) 루트 요청 시 index.html 반환
 @app.get("/")
