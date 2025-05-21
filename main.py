@@ -36,10 +36,16 @@ def get_mock_papers(query: str, pyear: str = '', pmonth: str = '') -> List[dict]
     ]
 
 # 추천 엔드포인트
+from fastapi.responses import JSONResponse
+
 @app.get("/recommend")
-async def recommend(query: str, pyear: str = '', pmonth: str = ''):
-    results = get_mock_papers(query, pyear, pmonth)
-    return JSONResponse(content=results)
+async def recommend(query: str = "", pyear: str = "", pmonth: str = ""):
+    mock_data = [
+        {"title": "인공지능을 활용한 추천 시스템 연구", "authors": "김철수", "link": "#"},
+        {"title": "딥러닝을 이용한 자연어처리 동향", "authors": "이영희", "link": "#"},
+    ]
+    return JSONResponse(content=mock_data)
+
 
 # 루트 요청 시 index.html 반환
 @app.get("/", include_in_schema=False)
