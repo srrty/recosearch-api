@@ -1,42 +1,34 @@
-# services/auth.py
-
+import os
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
-from jose import jwt
+from typing import Optional
+
 from sqlalchemy.orm import Session
+from jose import jwt
+from passlib.context import CryptContext
 
 from models.user import User
+from schemas.auth import UserCreate
 
-# ── 기존 JWT · password 헬퍼 ──
-SECRET_KEY = "your-very-secret-key"
+# 환경 변수에서 비밀 키와 알고리즘 설정
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+# 패스워드 해싱 설정
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(data: dict) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-# ── 여기에 추가 ──
-
-def register_user(db: Session, username: str, password: str) -> User:
+def create_user(db: Session, username: str, password: str) -> User:
     """
-    새 사용자를 DB에 등록합니다.
-    이미 같은 username이 있으면 ValueError를 던집니다.
+    새로운 사용자 생성 후 DB에 저장
     """
-    existing = db.query(User).filter_by(username=username).first()
-    if existing:
-        raise ValueError("중복된 아이디입니다!")
     hashed_pw = get_password_hash(password)
     user = User(username=username, hashed_password=hashed_pw)
     db.add(user)
@@ -44,15 +36,25 @@ def register_user(db: Session, username: str, password: str) -> User:
     db.refresh(user)
     return user
 
-def authenticate_user(db: Session, username: str, password: str) -> User:
+
+def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
     """
-    사용자명·비밀번호로 인증합니다.
-    사용자명 미존재 시 LookupError,
-    비밀번호 불일치 시 PermissionError를 던집니다.
+    사용자 인증: 존재 여부 및 비밀번호 확인
     """
-    user = db.query(User).filter_by(username=username).first()
+    user = db.query(User).filter(User.username == username).first()
     if not user:
-        raise LookupError("존재하지 않는 아이디입니다!")
+        return None
     if not verify_password(password, user.hashed_password):
-        raise PermissionError("비밀번호를 다시 확인해 주세요!")
+        return None
     return user
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    JWT 토큰 생성
+    """
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return token
