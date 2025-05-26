@@ -1,11 +1,9 @@
 fastapi
-uvicorn[standard]
-sqlalchemy
-alembic
+uvicorn
 python-dotenv
-requests
-bcrypt
-python-jose
+pydantic[email]
+sqlalchemy
+jose
 passlib[bcrypt]
+email-validator
 python-multipart
-pydantic

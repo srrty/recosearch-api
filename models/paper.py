@@ -1,10 +1,36 @@
-from sqlalchemy import Column, Integer, String, Text
-from db import Base
+#models/paper.py
+from pydantic import BaseModel
+from typing import List, Optional
 
-class Paper(Base):
-    __tablename__ = "papers"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    authors = Column(Text)
-    journal = Column(String)
-    url = Column(String)
+class Author(BaseModel):
+    order: Optional[int]
+    url:   Optional[str]
+    name:  str
+
+class Publication(BaseModel):
+    url:  Optional[str]
+    name: Optional[str]
+
+class Recommendation(BaseModel):
+    id: Optional[int]
+    paper_id: Optional[int]
+    title:        Optional[str]
+    authors:      List[Author]
+    publisher:    Publication
+    publication:  Publication
+    issue_yymm:   Optional[str]
+    pages:        Optional[str]
+    free_yn:      Optional[str]
+    price:        Optional[str]
+    preview_yn:   Optional[str]
+    preview:      Optional[str]
+    link_url:     Optional[str]
+    link_api:     Optional[str]
+
+class RecommendationResponse(BaseModel):
+    totalcount:      int
+    pyymm:           Optional[str]
+    recommendations: List[Recommendation]
+
+    class Config:
+        orm_mode = True

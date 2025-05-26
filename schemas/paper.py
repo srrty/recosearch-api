@@ -1,23 +1,18 @@
+from datetime import date
 from pydantic import BaseModel
-from typing import List, Optional
 
-class Author(BaseModel):
-    name: str
-
-class Publication(BaseModel):
-    name: Optional[str] = None
-
-class PaperCreate(BaseModel):
+class PaperBase(BaseModel):
     title: str
-    authors: List[Author]
-    publication: Publication
-    link_url: Optional[str] = None
+    authors: list[str]
+    journal: str | None = None
+    pub_date: date | None = None
+    link_url: str | None = None
 
-class PaperOut(BaseModel):
-    title: str
-    authors: List[Author]
-    publication: Publication
-    link_url: Optional[str] = None
+class PaperCreate(PaperBase):
+    pass
 
-class RecommendationResponse(BaseModel):
-    recommendations: List[PaperOut]
+class PaperOut(PaperBase):
+    id: int
+
+    class Config:
+        orm_mode = True

@@ -1,25 +1,41 @@
 # schemas/user.py
-from pydantic import BaseModel
 
-class UserCreate(BaseModel):
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+class UserBase(BaseModel):
     username: str
+    nickname: Optional[str] = None
+
+class UserCreate(UserBase):
     password: str
 
-class UserOut(BaseModel):
+class UserOut(UserBase):
     id: int
-    username: str
-    class Config:
-        from_attributes = True
+    is_active: bool
+    created_at: datetime
 
-# 비밀번호 변경을 위한 입력 모델
+    model_config = {"from_attributes": True}
+
+class UserInDB(UserBase):
+    id: int
+    hashed_password: str
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 class UserPasswordChange(BaseModel):
-    old_password: str
+    current_password: str
     new_password: str
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "old_password": "기존비밀번호123",
-                "new_password": "새로운비밀번호456"
-            }
-        }
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    nickname: Optional[str] = None
+
+# ✅ 주의: 아래처럼 UserOut만 쓰는 것도 가능함. 불필요하게 User라는 이름 중복 X!

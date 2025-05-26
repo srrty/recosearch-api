@@ -22,69 +22,54 @@
       cursor: pointer; font-size: 14px;
     }
     button:hover { background: #0056b3; }
-
-    /* ─────────── flex form-row ─────────── */
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 16px;
-      align-items: center;
-    }
+    .form-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; align-items: center; }
     .form-row label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      flex: 1;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 600; flex: 1;
     }
-    .form-row input,
-    .form-row select {
-      flex: 1;
-      padding: 6px 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    .form-row input, .form-row select {
+      flex: 1; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px;
     }
-
-    /* 상단바 */
     #top-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }
     #greeting { font-weight: 600; align-self: center; }
-    #logout { display: none; } /* 처음에는 숨김 */
+    #logout { display: none; }
 
-    /* 모달 공통 스타일 */
-    .modal {
-      display: none;
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      align-items: center; justify-content: center;
-      z-index: 1000;
-    }
+    /* 북마크 버튼 */
+    .bookmark-btn { margin-left: 10px; background: #ffb300; color: #333; }
+    .bookmark-btn.bookmarked { background: #ffd54f !important; color: #007BFF !important; }
+
+    /* 모달 */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
     .modal.active { display: flex; }
-    .modal-content {
-      background: #fff;
-      padding: 20px 30px;
-      border-radius: 8px;
-      width: 360px;
-      position: relative;
-    }
-    .modal-content h2 { margin: 0 0 16px; text-align: center; }
-    .modal-close {
-      position: absolute; top: 10px; right: 12px;
-      background: none; border: none; font-size: 18px;
-      cursor: pointer;
-    }
+    .modal-content { background: #fff; padding: 20px 30px; border-radius: 8px; width: 360px; position: relative; }
+    .modal-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 18px; cursor: pointer; }
     .message { color: green; font-size: 0.9em; text-align: center; margin-top: 8px; }
 
-    /* 추천 섹션 스타일 */
+    /* 추천 */
     .subject-group { margin-top: 10px; padding-left: 10px; }
     .subject-group label { display: inline-block; margin-right: 15px; font-weight: normal; }
     #result { margin-top: 40px; }
-    .paper { background: #f1f4f8; padding: 16px 20px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid #007BFF; }
+    .paper {
+      background: #f1f4f8; padding: 16px 20px; border-radius: 10px;
+      margin-bottom: 15px; border-left: 5px solid #007BFF; position: relative;
+    }
     .paper strong { font-size: 18px; color: #222; }
     .paper em { color: #666; display: block; margin-top: 4px; font-style: normal; }
     .paper a { display: inline-block; margin-top: 8px; color: #007BFF; text-decoration: none; }
     .paper a:hover { text-decoration: underline; }
+
+    /* 내 즐겨찾기 모달 */
+    #modal-bookmark .modal-content { width: 500px; max-height: 70vh; overflow-y: auto; }
+    .bm-list { margin: 0; padding: 0; list-style: none; }
+    .bm-list li {
+      margin-bottom: 15px; background: #f9fbe7; padding: 13px 18px;
+      border-radius: 8px; border-left: 5px solid #ffd54f; position: relative;
+    }
+    .bm-remove {
+      position: absolute; right: 16px; top: 18px;
+      color: #e74c3c; background: none; border: none; font-size: 16px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -96,6 +81,7 @@
       <button id="open-signup">회원가입</button>
       <button id="open-login">로그인</button>
       <span id="greeting"></span>
+      <button id="open-bookmark" style="display:none;">내 즐겨찾기</button>
       <button id="open-mypage" style="display:none;">마이페이지</button>
       <button id="logout">로그아웃</button>
     </div>
@@ -155,16 +141,9 @@
       <button class="modal-close" data-close="modal-signup">&times;</button>
       <h2>회원가입</h2>
       <form id="signup-form">
-        <div class="form-row">
-          <label>아이디
-            <input type="text" name="username" required minlength="3">
-          </label>
-        </div>
-        <div class="form-row">
-          <label>비밀번호
-            <input type="password" name="password" required minlength="6">
-          </label>
-        </div>
+        <div class="form-row"><label>아이디<input type="text" name="username" required minlength="3"></label></div>
+        <div class="form-row"><label>닉네임<input type="text" name="nickname" required minlength="2"></label></div>
+        <div class="form-row"><label>비밀번호<input type="password" name="password" required minlength="6"></label></div>
         <button type="submit">가입하기</button>
       </form>
       <div id="signup-msg" class="message"></div>
@@ -177,16 +156,8 @@
       <button class="modal-close" data-close="modal-login">&times;</button>
       <h2>로그인</h2>
       <form id="login-form">
-        <div class="form-row">
-          <label>아이디
-            <input type="text" name="username" required>
-          </label>
-        </div>
-        <div class="form-row">
-          <label>비밀번호
-            <input type="password" name="password" required>
-          </label>
-        </div>
+        <div class="form-row"><label>아이디<input type="text" name="username" required></label></div>
+        <div class="form-row"><label>비밀번호<input type="password" name="password" required></label></div>
         <button type="submit">로그인</button>
       </form>
       <div id="login-msg" class="message"></div>
@@ -199,143 +170,286 @@
       <button class="modal-close" data-close="modal-mypage">&times;</button>
       <h2>비밀번호 변경</h2>
       <form id="mypage-form">
-        <div class="form-row">
-          <label>현재 비밀번호
-            <input type="password" name="old_password" required minlength="6">
-          </label>
-        </div>
-        <div class="form-row">
-          <label>새 비밀번호
-            <input type="password" name="new_password" required minlength="6">
-          </label>
-        </div>
+        <div class="form-row"><label>현재 비밀번호<input type="password" name="current_password" required minlength="6"></label></div>
+        <div class="form-row"><label>새 비밀번호<input type="password" name="new_password" required minlength="6"></label></div>
         <button type="submit">변경하기</button>
       </form>
       <div id="mypage-msg" class="message"></div>
     </div>
   </div>
 
-  <script>
-    // 모달 제어
+  <!-- 내 즐겨찾기 모달 -->
+  <div id="modal-bookmark" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close="modal-bookmark">&times;</button>
+      <h2>내 즐겨찾기 논문</h2>
+      <ul class="bm-list" id="bm-list"></ul>
+      <div id="bookmark-msg" class="message"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    // 공통 인증 헤더 반환
+    function authHeaders() {
+      const token = localStorage.getItem('token');
+      return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
+
+    // GET 요청
+    async function apiGet(path, params = {}) {
+      const url = new URL(API_BASE + path);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== '') url.searchParams.append(k, v);
+      });
+      const res = await fetch(url, { headers: authHeaders() });
+      if (!res.ok) throw res;
+      return res.json();
+    }
+
+    // POST/DELETE 요청
+    async function apiSend(path, { method = 'POST', body } = {}) {
+      const headers = { ...authHeaders() };
+      if (body !== undefined) headers['Content-Type'] = 'application/json';
+      const res = await fetch(API_BASE + path, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) throw res;
+      return res.status === 204 ? null : res.json();
+    }
+
+    // 모달 열기/닫기
     const openModal = id => document.getElementById(id).classList.add('active');
     const closeModal = id => document.getElementById(id).classList.remove('active');
+    document.querySelectorAll('.modal-close').forEach(b => b.onclick = () => closeModal(b.dataset.close));
+    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => e.target === m && closeModal(m.id)));
     document.getElementById('open-signup').onclick = () => openModal('modal-signup');
     document.getElementById('open-login').onclick  = () => openModal('modal-login');
     document.getElementById('open-mypage').onclick = () => openModal('modal-mypage');
-    document.querySelectorAll('.modal').forEach(m => {
-      m.addEventListener('click', e => e.target===m && closeModal(m.id));
-    });
-    document.querySelectorAll('.modal-close').forEach(b => {
-      b.onclick = () => closeModal(b.dataset.close);
-    });
+    document.getElementById('open-bookmark').onclick = () => { loadBookmarks(); openModal('modal-bookmark'); };
 
-    // 인사말·로그아웃 표시 함수
-    function showGreeting(username) {
-      document.getElementById('open-signup').style.display = 'none';
-      document.getElementById('open-login').style.display  = 'none';
-      document.getElementById('logout').style.display      = 'inline-block';
-      document.getElementById('greeting').textContent      = `${username}님, 반갑습니다!`;
-      document.getElementById('open-mypage').style.display = 'inline-block';
+    // 인사말·닉네임 표시
+    async function showGreeting() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      let userInfo;
+      try {
+        userInfo = await apiGet('/auth/me');
+      } catch {
+        userInfo = { username: localStorage.getItem('username') };
+      }
+      document.getElementById('open-signup').style.display   = 'none';
+      document.getElementById('open-login').style.display    = 'none';
+      document.getElementById('logout').style.display        = 'inline-block';
+      document.getElementById('open-bookmark').style.display = 'inline-block';
+      document.getElementById('open-mypage').style.display   = 'inline-block';
+      document.getElementById('greeting').textContent        = `${userInfo.nickname || userInfo.username}님, 반갑습니다!`;
     }
-
-    // 로그아웃 처리
     document.getElementById('logout').onclick = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('username');
-      window.location.reload();  // 새로고침해서 초기 상태로
+      window.location.reload();
     };
-
-    // 초기 로드 시 이미 로그인된 상태면 인사말·로그아웃 표시
-    window.addEventListener('DOMContentLoaded', () => {
-      const user = localStorage.getItem('username');
-      if (user) showGreeting(user);
-    });
+    window.addEventListener('DOMContentLoaded', showGreeting);
 
     // 메시지 헬퍼
-    const showMessage = (id, txt) => document.getElementById(id).textContent = txt;
+    const showMessage = (id, txt, color = 'green') => {
+      const el = document.getElementById(id);
+      el.textContent = txt;
+      el.style.color   = color;
+    };
 
-    // 회원가입 AJAX
+    // 회원가입
     document.getElementById('signup-form').addEventListener('submit', async e => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
-      const res  = await fetch('/auth/register', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        showMessage('signup-msg','가입 성공! 로그인 해주세요.');
-      } else {
+      try {
+        await apiSend('/auth/signup', { body: data });
+        showMessage('signup-msg', '가입 성공! 로그인 해주세요.');
+      } catch (res) {
         const err = await res.json();
-        showMessage('signup-msg', err.detail || '가입 실패');
+        showMessage('signup-msg', err.detail || '가입 실패', 'red');
       }
     });
 
-    // 로그인 AJAX
+    // 로그인
     document.getElementById('login-form').addEventListener('submit', async e => {
       e.preventDefault();
       const form = new URLSearchParams(new FormData(e.target));
-      const res  = await fetch('/auth/token', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: form
-      });
-      if (res.ok) {
-        const { access_token } = await res.json();
-        const user = form.get('username');
+      try {
+        const { access_token } = await fetch(API_BASE + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: form
+        }).then(r => r.json());
         localStorage.setItem('token', access_token);
-        localStorage.setItem('username', user);
-        showGreeting(user);
+        localStorage.setItem('username', form.get('username'));
         closeModal('modal-login');
-      } else {
-        const err = await res.json();
-        showMessage('login-msg', err.detail || '로그인 실패');
+        showGreeting();
+      } catch {
+        showMessage('login-msg', '로그인 실패', 'red');
       }
     });
 
-    // 추천 폼 AJAX
+    // 내 북마크 맵 로딩
+    async function loadBookmarksSet() {
+      try {
+        const data = await apiGet('/bookmarks/');
+        return Object.fromEntries(data.map(bm => [bm.paper_id, bm.id]));
+      } catch {
+        return {};
+      }
+    }
+
+    // 추천 요청 & 렌더링
     document.getElementById('recommend-form').addEventListener('submit', async e => {
       e.preventDefault();
-      const params = new URLSearchParams(new FormData(e.target)).toString();
-      const token  = localStorage.getItem('token');
-      const res    = await fetch(`/recommend?${params}`, {
-        headers: token ? {'Authorization':`Bearer ${token}`} : {}
-      });
-      const { recommendations = [] } = await res.json().catch(()=>({ recommendations: [] }));
-      document.getElementById('result').innerHTML = recommendations.length
-        ? recommendations.map(item => `
-            <div class="paper">
-              <strong>${item.title}</strong>
-              <em>저자: ${item.authors.map(a=>a.name).join(', ')}</em>
-              <p>간행물: ${item.publication.name||'N/A'}</p>
-              <a href="${item.link_url}" target="_blank">상세 보기</a>
-            </div>
-          `).join('')
-        : '<p>추천된 논문이 없습니다.</p>';
+      const params = Object.fromEntries(new FormData(e.target));
+      try {
+        const { recommendations } = await apiGet('/recommend', params);
+        renderRecommendations(recommendations);
+      } catch (res) {
+        if (res.status === 401) alert('로그인이 필요합니다.');
+        else alert('추천 논문을 불러오지 못했습니다.');
+      }
     });
 
-    // 마이페이지(비밀번호 변경) 폼 처리
+    function renderRecommendations(recs) {
+      loadBookmarksSet().then(bmMap => {
+        const html = recs.map(item => {
+          // 1) link_api에서 "id=NODE12345678" 형식으로 nodeId(접두사 포함) 추출
+          const api = item.link_api || "";
+          const m   = api.match(/id=(NODE\d+)/);
+          const nodeIdParam = m ? m[1] : null;
+          // (fallback) paper_id 숫자만 있다면 접두사 붙여서 사용
+          const nodeId = nodeIdParam || `NODE${item.paper_id}`;
+
+          // 2) 올바른 완전경로 URL 생성
+          const detailUrl = `https://www.dbpia.co.kr/journal/articleDetail?nodeId=${nodeId}`;
+
+          // 3) 북마크 여부
+          const pid = item.paper_id;
+          const bookmarked = bmMap[pid] !== undefined;
+
+          return `
+            <div class="paper" data-paper-id="${pid}">
+              <strong>${item.title}</strong>
+              <em>저자: ${item.authors.map(a => a.name).join(', ')}</em>
+              <p>간행물: ${item.publication?.name || 'N/A'}</p>
+
+              <a href="${detailUrl}"
+                target="_blank" rel="noopener noreferrer"
+                style="display:inline-block; margin:4px 0;
+                        font-size:0.9em; color:#007BFF; text-decoration:none;">
+                상세 보기
+              </a>
+
+              <button class="bookmark-btn${bookmarked?' bookmarked':''}"
+                      data-paper-id="${pid}"
+                      data-paper-title="${item.title.replace(/"/g,'&quot;')}"
+                      data-paper-link="${detailUrl}"
+                      data-bookmark-id="${bookmarked?bmMap[pid]:''}">
+                ${bookmarked?'즐겨찾기 해제':'즐겨찾기 추가'}
+              </button>
+            </div>
+          `;
+        }).join('');
+        document.getElementById('result').innerHTML = html;
+      });
+    }
+
+
+    // 북마크 추가/삭제 핸들러
+    document.getElementById('result').addEventListener('click', async e => {
+      if (!e.target.classList.contains('bookmark-btn')) return;
+      const btn   = e.target;
+      const pid   = Number(btn.dataset.paperId);
+      const title = btn.dataset.paperTitle;    // ← 여기에 담긴 제목을 꺼내고
+      const link  = btn.dataset.paperLink;
+      const bid   = btn.dataset.bookmarkId;
+      const token = localStorage.getItem('token');
+      if (!token) return alert('로그인이 필요합니다!');
+
+      try {
+        if (btn.classList.contains('bookmarked')) {
+          // 즐겨찾기 해제
+          await apiSend(`/bookmarks/${bid}`, { method: 'DELETE' });
+          btn.classList.remove('bookmarked');
+          btn.textContent = '즐겨찾기 추가';
+          btn.dataset.bookmarkId = '';
+        } else {
+          // 즐겨찾기 추가: paper_id + paper_title 둘 다 전송
+          const { id } = await apiSend('/bookmarks/', {
+            body: {
+              paper_id:    pid,
+              paper_title: title,
+              paper_link:  link
+            }
+          });
+          btn.classList.add('bookmarked');
+          btn.textContent = '즐겨찾기 해제';
+          btn.dataset.bookmarkId = id;
+        }
+      } catch {
+        alert('즐겨찾기 처리 중 오류가 발생했습니다.');
+      }
+    });
+
+    // 내 즐겨찾기 모달 로딩
+    async function loadBookmarks() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const ul = document.getElementById('bm-list');
+      ul.innerHTML = '<li>불러오는 중...</li>';
+      try {
+        // 슬래시(/) 꼭 붙이기
+        const list = await apiGet('/bookmarks/');
+        ul.innerHTML = list.length
+          ? list.map(bm => `
+              <li>
+                <strong>${bm.paper_title}</strong><br>      <!-- title 사용 -->
+                <small>ID: ${bm.id}</small><br>
+                <a href="${bm.paper_link}"
+                  target="_blank"
+                  style="display:inline-block; margin:4px 0; font-size:0.9em; color:#007BFF; text-decoration:none;">
+                  상세 보기
+                </a>
+                <button class="bm-remove" data-bmid="${bm.id}">✖</button>
+              </li>
+            `).join('')
+          : '<li>즐겨찾기한 논문이 없습니다.</li>';
+      } catch {
+        ul.innerHTML = '<li>불러오기 오류</li>';
+      }
+    }
+
+    // 즐겨찾기 모달 내 해제
+    document.getElementById('bm-list').addEventListener('click', async e => {
+      if (!e.target.classList.contains('bm-remove')) return;
+      const bmid = e.target.dataset.bmid;
+      try {
+        await apiSend(`/bookmarks/${bmid}`, { method: 'DELETE' });
+        e.target.closest('li').remove();
+      } catch {
+        alert('삭제 중 오류가 발생했습니다.');
+      }
+    });
+
+    // 비밀번호 변경
     document.getElementById('mypage-form').addEventListener('submit', async e => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
-      const token = localStorage.getItem('token');
-      const res = await fetch('/mypage/password', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        showMessage('mypage-msg','✅ 비밀번호가 변경되었습니다.');
-        setTimeout(()=>closeModal('modal-mypage'), 1000);
-      } else {
-        const err = await res.json();
-        showMessage('mypage-msg', err.detail || '❌ 변경 실패');
+      try {
+        await apiSend('/mypage/password', { method: 'PATCH', body: data });
+        showMessage('mypage-msg', '✅ 비밀번호가 변경되었습니다.');
+        setTimeout(() => closeModal('modal-mypage'), 1000);
+      } catch {
+        showMessage('mypage-msg', '❌ 변경 실패', 'red');
       }
     });
-
   </script>
 </body>
 </html>

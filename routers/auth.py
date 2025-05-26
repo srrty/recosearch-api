@@ -1,50 +1,75 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from db import get_db
-from models.user import User
-from schemas.auth import Token, UserCreate, User as UserSchema
-from services.auth import create_user, authenticate_user, create_access_token
 from jose import JWTError, jwt
-import os
+from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+from services.auth import (
+    authenticate_user,
+    create_access_token,
+    register_user,
+    SECRET_KEY,
+    ALGORITHM,
+    ACCESS_TOKEN_EXPIRE_MINUTES
+)
+from db import get_db
+from schemas.user import UserCreate, Token, UserOut
+from models.user import User as UserModel
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+router = APIRouter(tags=["auth"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-@router.post("/register", response_model=Token)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    user = create_user(db, user_in.username, user_in.password)
-    access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+@router.post("/signup", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+def signup(user_in: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(UserModel).filter(UserModel.username == user_in.username).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="이미 등록된 사용자입니다.")
+    user = register_user(db, user_in)
+    return user
 
-@router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    access_token = create_access_token(data={"sub": user.username})
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="아이디 또는 비밀번호가 올바르지 않습니다.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=expires
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=UserSchema)
+@router.get("/me", response_model=UserOut)
 def read_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    # 토큰에서 사용자명(sub) 추출
     try:
-        payload = jwt.decode(
-            token,
-            os.getenv("JWT_SECRET_KEY", "change-me"),
-            algorithms=[os.getenv("JWT_ALGORITHM", "HS256")],
-        )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 정보를 확인할 수 없습니다.")
     except JWTError:
-        raise credentials_exception
-    user = db.query(User).filter(User.username == username).first()
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 정보를 확인할 수 없습니다.")
+    # DB에서 사용자 조회
+    user = db.query(UserModel).filter(UserModel.username == username).first()
     if user is None:
-        raise credentials_exception
-    return user
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
+    return UserOut.from_orm(user)
+
+
+def get_current_user_model(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> UserModel:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 정보를 확인할 수 없습니다.")
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="인증 정보를 확인할 수 없습니다.")
+    user = db.query(UserModel).filter(UserModel.username == username).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
+    return user  # 👈 이게 핵심! UserModel(DB 객체) 반환
