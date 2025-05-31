@@ -71,9 +71,7 @@
       color: #e74c3c; background: none; border: none; font-size: 16px; cursor: pointer;
     }
   </style>
-=======
   <link rel="stylesheet" href="/static/css/style.css">
->>>>>>> 9db97aa (기능 추가)
 </head>
 <body>
   <div class="container">
@@ -118,8 +116,6 @@
         </label>
       </div>
       <div class="form-row">
-<<<<<<< HEAD
-=======
   	<label>정렬 기준:
     	  <select name="sort_by">
       	    <option value="popularity">인기순</option>
@@ -139,7 +135,6 @@
 	</label>
       </div>
       <div class="form-row">
->>>>>>> 9db97aa (기능 추가)
         <label>주제 분류:</label>
         <div class="subject-group">
           <label><input type="radio" name="category" value="">전체</label>
@@ -156,7 +151,6 @@
       </div>
       <button type="submit">논문 추천받기</button>
     </form>
-
     <div id="result"></div>
   </div>
 
@@ -190,12 +184,10 @@
   </div>
 
   <!-- 마이페이지 모달 -->
-<<<<<<< HEAD
   <div id="modal-mypage" class="modal">
     <div class="modal-content">
       <button class="modal-close" data-close="modal-mypage">&times;</button>
       <h2>비밀번호 변경</h2>
-=======
 <div id="modal-mypage" class="modal">
   <div class="modal-content">
     <button class="modal-close" data-close="modal-mypage">&times;</button>
@@ -221,7 +213,6 @@
 
     <!-- 비밀번호 변경 탭 -->
     <div id="tab-password" class="mypage-tab" style="display: none;">
->>>>>>> 9db97aa (기능 추가)
       <form id="mypage-form">
         <div class="form-row"><label>현재 비밀번호<input type="password" name="current_password" required minlength="6"></label></div>
         <div class="form-row"><label>새 비밀번호<input type="password" name="new_password" required minlength="6"></label></div>
@@ -230,10 +221,7 @@
       <div id="mypage-msg" class="message"></div>
     </div>
   </div>
-<<<<<<< HEAD
-=======
 </div>
->>>>>>> 9db97aa (기능 추가)
 
   <!-- 내 즐겨찾기 모달 -->
   <div id="modal-bookmark" class="modal">
@@ -246,11 +234,8 @@
   </div>
 
   <script type="module">
-<<<<<<< HEAD
     const API_BASE = 'https://recosearch.co.kr';
-=======
     const API_BASE = 'https://recosearch.co.kr';
->>>>>>> 9db97aa (기능 추가)
 
     // 공통 인증 헤더 반환
     function authHeaders() {
@@ -368,11 +353,8 @@
     // 추천 요청 & 렌더링
     document.getElementById('recommend-form').addEventListener('submit', async e => {
       e.preventDefault();
-<<<<<<< HEAD
       const params = Object.fromEntries(new FormData(e.target));
-=======
       	const params = Object.fromEntries(new FormData(e.target));
->>>>>>> 9db97aa (기능 추가)
       try {
         const { recommendations } = await apiGet('/recommend', params);
         renderRecommendations(recommendations);
@@ -476,10 +458,7 @@
           ? list.map(bm => `
               <li>
                 <strong>${bm.paper_title}</strong><br>      <!-- title 사용 -->
-<<<<<<< HEAD
                 <small>ID: ${bm.id}</small><br>
-=======
->>>>>>> 9db97aa (기능 추가)
                 <a href="${bm.paper_link}"
                   target="_blank"
                   style="display:inline-block; margin:4px 0; font-size:0.9em; color:#007BFF; text-decoration:none;">
@@ -508,7 +487,6 @@
 
     // 비밀번호 변경
     document.getElementById('mypage-form').addEventListener('submit', async e => {
-<<<<<<< HEAD
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
       try {
@@ -522,7 +500,6 @@
   </script>
 </body>
 </html>
-=======
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target));
   try {
