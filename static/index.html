@@ -353,7 +353,6 @@
     document.getElementById('recommend-form').addEventListener('submit', async e => {
       e.preventDefault();
       const params = Object.fromEntries(new FormData(e.target));
-      	const params = Object.fromEntries(new FormData(e.target));
       try {
         const { recommendations } = await apiGet('/recommend', params);
         renderRecommendations(recommendations);
