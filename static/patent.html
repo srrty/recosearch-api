@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>특허 검색</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #f7f7f7; }
+    h1 { color: #333; }
+    input, select, button { padding: 8px; font-size: 14px; margin: 4px; }
+    #result { margin-top: 20px; }
+    .patent {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-left: 4px solid #007BFF;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 특허 검색</h1>
+<div style="margin-bottom: 20px;">
+  <button onclick="location.href='/static/index.html'">📚 논문 추천으로 돌아가기</button>
+</div>
+  <div>
+    <input type="text" id="query" placeholder="키워드 검색">
+    <select id="pyear">
+      <option value="">연도 선택</option>
+      <option value="2024">2024</option>
+      <option value="2023">2023</option>
+      <option value="2022">2022</option>
+    </select>
+    <select id="pmonth">
+      <option value="">월 선택</option>
+      <option value="01">1월</option>
+      <option value="02">2월</option>
+      <option value="03">3월</option>
+      <option value="04">4월</option>
+      <option value="05">5월</option>
+      <option value="06">6월</option>
+      <option value="07">7월</option>
+      <option value="08">8월</option>
+      <option value="09">9월</option>
+      <option value="10">10월</option>
+      <option value="11">11월</option>
+      <option value="12">12월</option>
+    </select>
+    <input type="text" id="patent_no" placeholder="표준 특허번호">
+    <button onclick="searchPatents()">검색</button>
+  </div>
+  <div id="result"></div>
+
+  <script>
+    async function searchPatents() {
+      const query = document.getElementById('query').value;
+      const pyear = document.getElementById('pyear').value;
+      const pmonth = document.getElementById('pmonth').value;
+      const patent_no = document.getElementById('patent_no').value;
+
+      const url = new URL('/patents', window.location.origin);
+      if (query) url.searchParams.set('query', query);
+      if (pyear && pmonth) {
+        url.searchParams.set('pyear', pyear);
+        url.searchParams.set('pmonth', pmonth);
+      }
+      if (patent_no) url.searchParams.set('patent_no', patent_no);
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const container = document.getElementById('result');
+      container.innerHTML = '';
+
+      if (!data.recommendations?.length) {
+        container.textContent = '검색 결과가 없습니다.';
+        return;
+      }
+
+      data.recommendations.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'patent';
+        div.innerHTML = `
+          <strong>${item.title}</strong><br>
+          출원인: ${item.applicant}<br>
+          출원일: ${item.application_date}<br>
+          <a href="${item.link}" target="_blank">상세 보기</a>
+        `;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
