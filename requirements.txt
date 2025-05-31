@@ -3,8 +3,8 @@ uvicorn
 python-dotenv
 pydantic[email]
 sqlalchemy
-jose
 passlib[bcrypt]
 email-validator
 python-multipart
 requests
+python-jose[cryptography]>=3.3.0
