@@ -40,14 +40,11 @@ async function loadBookmarks() {
             href = `https://www.dbpia.co.kr/journal/articleDetail?nodeId=NODE${bm.paper_id}`;
           }
 
-          return `
-            <li>
-              <strong>${bm.title}</strong><br>
-              <small>ID: ${bm.id}</small><br>
-              <a href="${href}" target="_blank" rel="noopener">상세 보기</a>
-              <button class="bm-remove" data-bmid="${bm.id}">✖</button>
-            </li>
-          `;
+          return `<li>
+  <span class="bm-title">${bm.title}</span>
+  <span class="bm-info">ID: ${bm.id} <a href="${href}" target="_blank" rel="noopener">상세 보기</a></span>
+  <button class="bm-remove" data-bmid="${bm.id}">✖</button>
+</li>`;
         }).join("")
       : '<li>즐겨찾기한 논문이 없습니다.</li>';
   } catch (err) {
